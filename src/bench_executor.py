@@ -38,6 +38,11 @@ class BenchExecutor:
 
     def build_command(self, config: BenchCommand) -> List[str]:
         """Build vllm bench command"""
+        # Extract directory and filename from output_json path
+        output_path = Path(config.output_json)
+        result_dir = str(output_path.parent)
+        result_filename = output_path.name
+
         cmd = [
             "vllm",
             "bench",
@@ -46,27 +51,34 @@ class BenchExecutor:
             config.model,
             "--tokenizer",
             config.tokenizer,
+            "--backend",
+            "openai",
+            "--base-url",
+            self.base_url,
             "--endpoint",
-            f"{self.base_url}/v1/completions",
+            "/v1/completions",
             "--dataset-name",
             config.dataset_name,
             "--num-prompts",
             str(config.num_prompts),
-            "--input-len",
+            "--random-input-len",
             str(config.input_len),
-            "--output-len",
+            "--random-output-len",
             str(config.output_len),
             "--seed",
             str(config.seed),
-            "--save-json-results",
-            config.output_json,
+            "--save-result",
+            "--result-dir",
+            result_dir,
+            "--result-filename",
+            result_filename,
         ]
 
         if config.dataset_path:
             cmd.extend(["--dataset-path", config.dataset_path])
 
         if config.concurrency:
-            cmd.extend(["--num-clients", str(config.concurrency)])
+            cmd.extend(["--max-concurrency", str(config.concurrency)])
 
         if config.request_rate:
             cmd.extend(["--request-rate", str(config.request_rate)])
