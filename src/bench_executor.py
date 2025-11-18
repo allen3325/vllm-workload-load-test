@@ -15,6 +15,7 @@ class BenchCommand:
     """vllm bench command configuration"""
 
     model: str
+    tokenizer: str
     host: str
     port: int
     dataset_name: str
@@ -41,9 +42,10 @@ class BenchExecutor:
             "vllm",
             "bench",
             "serve",
+            "--model",
             config.model,
-            "--backend",
-            "vllm",
+            "--tokenizer",
+            config.tokenizer,
             "--endpoint",
             f"{self.base_url}/v1/completions",
             "--dataset-name",

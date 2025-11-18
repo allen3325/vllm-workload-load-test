@@ -1,22 +1,21 @@
 # vLLM service settings
 vllm_service:
-  model: "Qwen/Qwen2-0.5B"
-  host: "localhost"
+  model: Chatbot-A-large
+  tokenizer: Qwen/Qwen3-1.7B
   port: 8000
   # Optional: auto start if service not running
   auto_start: false
   # vLLM serve startup arguments (used when auto_start=true)
   serve_args:
-    gpu_memory_utilization: 0.9
-    tensor_parallel_size: 1
+    gpu_memory_utilization: 0.7
     max_num_seqs: 4
 
 # vLLM Bench configuration
 benchmark:
   # Dataset configuration
   dataset:
-    name: "sharegpt"  # or "sonnet", "random"
-    path: null        # custom dataset path (optional)
+    name: "custom"  # or "sonnet", "random"
+    path: test_datasets/short_question_custom.jsonl        # custom dataset path (optional)
   
   # Number of prompts per test
   num_prompts: 100

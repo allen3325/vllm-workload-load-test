@@ -52,6 +52,7 @@ class ExperimentRunner:
 
             cmd = BenchCommand(
                 model=self.config.vllm_service.model,
+                tokenizer=self.config.vllm_service.tokenizer,
                 host=self.config.vllm_service.host,
                 port=self.config.vllm_service.port,
                 dataset_name=self.config.benchmark.dataset.name,

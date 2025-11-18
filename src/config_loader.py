@@ -18,6 +18,7 @@ class VLLMServiceConfig(BaseModel):
     """vLLM service configuration"""
 
     model: str
+    tokenizer: str
     host: str = "localhost"
     port: int = 8000
     auto_start: bool = False
@@ -27,7 +28,7 @@ class VLLMServiceConfig(BaseModel):
 class DatasetConfig(BaseModel):
     """Dataset configuration"""
 
-    name: Literal["sharegpt", "sonnet", "random"] = "sharegpt"
+    name: Literal["sharegpt", "sonnet", "random", "custom"] = "sharegpt"
     path: Optional[str] = None
 
 
