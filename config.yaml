@@ -1,0 +1,91 @@
+# vLLM service settings
+vllm_service:
+  model: Chatbot-A-large
+  tokenizer: Qwen/Qwen3-1.7B
+  port: 8001
+  # Optional: auto start if service not running
+  auto_start: false
+  # vLLM serve startup arguments (used when auto_start=true)
+  serve_args:
+    gpu_memory_utilization: 0.7
+    max_num_seqs: 4
+
+# vLLM Bench configuration
+benchmark:
+  # Dataset configuration
+  dataset:
+    name: "custom"  # or "sonnet", "random"
+    path: test_datasets/short_question_custom.jsonl        # custom dataset path (optional)
+  
+  # Number of prompts per test
+  num_prompts: 100
+  
+  # Other vllm bench parameters
+  request_rate: null  # if null use concurrency mode
+  seed: 42
+  trust_remote_code: true
+  
+  # Output settings
+  output_format: "json"
+  save_results: true
+
+# Sweep variables for experiments
+sweep_variables:
+  # Test strategy: use concurrency or request_rate
+  # If concurrency_levels specified, use concurrency mode
+  concurrency_levels: [1, 2, 4, 8]
+  
+  # If request_rates specified, use request-rate mode (mutually exclusive with concurrency)
+  # request_rates: [1, 2, 5, 10, 20]
+  
+  # Input length configuration
+  input_lengths:
+    type: list  # 'list', 'fixed', 'range'
+    values: [128, 512, 1024, 2048]
+    # If type: range
+    # min: 128
+    # max: 2048
+    # step: 256
+  
+  # Output length configuration
+  output_lengths:
+    type: fixed
+    value: 256
+    # or use list
+    # type: list
+    # values: [128, 256, 512]
+
+# Output and reporting settings
+output:
+  # Results directory
+  results_dir: "results"
+  
+  # Raw output per run (vllm bench JSON)
+  raw_results_pattern: "results/raw/run_{run_id}.json"
+  
+  # Aggregated data
+  aggregated_csv: "results/aggregated_results.csv"
+  
+  # Statistical summary
+  summary_json: "results/summary.json"
+  
+  # Visualization plots
+  plots_dir: "results/plots"
+  
+  # Log file
+  log_file: "results/benchmark.log"
+
+# Analysis and visualization settings
+analysis:
+  # Plot types to generate
+  plots:
+    - "ttft_vs_input_length"
+    - "itl_vs_output_length"
+    - "latency_vs_concurrency"
+    - "throughput_vs_concurrency"
+  
+  # Statistical percentiles
+  percentiles: [50, 90, 95, 99]
+  
+  # Whether to generate a detailed report
+  detailed_report: true
