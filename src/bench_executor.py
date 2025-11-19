@@ -100,7 +100,9 @@ class BenchExecutor:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=3600)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=True, timeout=3600
+            )
 
             logger.info("Command completed")
             logger.debug(f"STDOUT: {result.stdout}")
@@ -133,9 +135,18 @@ class BenchExecutor:
 
             try:
                 result = self.execute(config)
-                results.append({"config": config, "result": result, "status": "success"})
+                results.append(
+                    {"config": config, "result": result, "status": "success"}
+                )
             except Exception as e:
                 logger.error(f"Benchmark {idx} failed: {e}")
-                results.append({"config": config, "result": None, "status": "failed", "error": str(e)})
+                results.append(
+                    {
+                        "config": config,
+                        "result": None,
+                        "status": "failed",
+                        "error": str(e),
+                    }
+                )
 
         return results

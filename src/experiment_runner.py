@@ -30,7 +30,9 @@ class ExperimentRunner:
         elif length_config.type == "fixed":
             return [length_config.value]
         elif length_config.type == "range":
-            return list(range(length_config.min, length_config.max + 1, length_config.step or 1))
+            return list(
+                range(length_config.min, length_config.max + 1, length_config.step or 1)
+            )
         raise ValueError(f"Unknown type: {length_config.type}")
 
     def build_experiment_matrix(self) -> List[BenchCommand]:
@@ -41,12 +43,16 @@ class ExperimentRunner:
         output_lengths = self._expand_length_config(sweep.output_lengths)
 
         use_concurrency = sweep.concurrency_levels is not None
-        load_levels = sweep.concurrency_levels if use_concurrency else sweep.request_rates
+        load_levels = (
+            sweep.concurrency_levels if use_concurrency else sweep.request_rates
+        )
 
         commands = []
         run_counter = 1
 
-        for load, input_len, output_len in product(load_levels, input_lengths, output_lengths):
+        for load, input_len, output_len in product(
+            load_levels, input_lengths, output_lengths
+        ):
             run_id = f"run_{run_counter:03d}"
             output_json = self.config.output.raw_results_pattern.format(run_id=run_id)
 
@@ -77,15 +83,21 @@ class ExperimentRunner:
         """Print experiment matrix"""
         commands = self.build_experiment_matrix()
 
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print(f"Experiment Matrix ({len(commands)} experiments)")
-        print(f"{'='*80}\n")
+        print(f"{'=' * 80}\n")
 
         for idx, cmd in enumerate(commands, 1):
-            strategy = f"concurrency={cmd.concurrency}" if cmd.concurrency else f"rps={cmd.request_rate}"
-            print(f"Run {idx:03d}: {strategy}, input={cmd.input_len}, output={cmd.output_len}")
+            strategy = (
+                f"concurrency={cmd.concurrency}"
+                if cmd.concurrency
+                else f"rps={cmd.request_rate}"
+            )
+            print(
+                f"Run {idx:03d}: {strategy}, input={cmd.input_len}, output={cmd.output_len}"
+            )
 
-        print(f"\n{'='*80}\n")
+        print(f"\n{'=' * 80}\n")
 
     def run_all_experiments(self):
         """Run all experiments"""

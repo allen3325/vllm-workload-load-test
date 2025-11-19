@@ -31,7 +31,12 @@ class MetricsAnalyzer:
         if "concurrency" in df.columns and df["concurrency"].nunique() > 1:
             for conc in sorted(df["concurrency"].dropna().unique()):
                 subset = df[df["concurrency"] == conc]
-                plt.plot(subset["input_len"], subset["median_ttft_ms"], marker="o", label=f"Concurrency={int(conc)}")
+                plt.plot(
+                    subset["input_len"],
+                    subset["median_ttft_ms"],
+                    marker="o",
+                    label=f"Concurrency={int(conc)}",
+                )
         else:
             plt.plot(df["input_len"], df["median_ttft_ms"], marker="o")
 
@@ -57,7 +62,12 @@ class MetricsAnalyzer:
         if "concurrency" in df.columns and df["concurrency"].nunique() > 1:
             for conc in sorted(df["concurrency"].dropna().unique()):
                 subset = df[df["concurrency"] == conc]
-                plt.plot(subset["output_len"], subset["median_itl_ms"], marker="o", label=f"Concurrency={int(conc)}")
+                plt.plot(
+                    subset["output_len"],
+                    subset["median_itl_ms"],
+                    marker="o",
+                    label=f"Concurrency={int(conc)}",
+                )
         else:
             plt.plot(df["output_len"], df["median_itl_ms"], marker="o")
 
@@ -80,10 +90,26 @@ class MetricsAnalyzer:
 
         plt.figure(figsize=(12, 6))
 
-        grouped = df.groupby("concurrency").agg({"median_ttft_ms": "mean", "p99_ttft_ms": "mean"}).reset_index()
+        grouped = (
+            df.groupby("concurrency")
+            .agg({"median_ttft_ms": "mean", "p99_ttft_ms": "mean"})
+            .reset_index()
+        )
 
-        plt.plot(grouped["concurrency"], grouped["median_ttft_ms"], marker="o", label="Median TTFT", linewidth=2)
-        plt.plot(grouped["concurrency"], grouped["p99_ttft_ms"], marker="s", label="P99 TTFT", linewidth=2)
+        plt.plot(
+            grouped["concurrency"],
+            grouped["median_ttft_ms"],
+            marker="o",
+            label="Median TTFT",
+            linewidth=2,
+        )
+        plt.plot(
+            grouped["concurrency"],
+            grouped["p99_ttft_ms"],
+            marker="s",
+            label="P99 TTFT",
+            linewidth=2,
+        )
 
         plt.xlabel("Concurrency Level")
         plt.ylabel("TTFT (ms)")
@@ -106,7 +132,13 @@ class MetricsAnalyzer:
 
         grouped = df.groupby("concurrency")["throughput"].mean().reset_index()
 
-        plt.plot(grouped["concurrency"], grouped["throughput"], marker="o", linewidth=2, markersize=8)
+        plt.plot(
+            grouped["concurrency"],
+            grouped["throughput"],
+            marker="o",
+            linewidth=2,
+            markersize=8,
+        )
 
         plt.xlabel("Concurrency Level")
         plt.ylabel("Throughput (tokens/s)")

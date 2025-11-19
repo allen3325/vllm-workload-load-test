@@ -2,7 +2,7 @@
 vllm_service:
   model: Chatbot-A-large
   tokenizer: Qwen/Qwen3-1.7B
-  port: 8000
+  port: 8001
   # Optional: auto start if service not running
   auto_start: false
   # vLLM serve startup arguments (used when auto_start=true)

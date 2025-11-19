@@ -90,7 +90,9 @@ class SweepVariablesConfig(BaseModel):
     def validate_strategy(cls, v, info):
         concurrency = info.data.get("concurrency_levels")
         if concurrency and v:
-            raise ValueError("concurrency_levels and request_rates are mutually exclusive")
+            raise ValueError(
+                "concurrency_levels and request_rates are mutually exclusive"
+            )
         if not concurrency and not v:
             raise ValueError("Must specify either concurrency_levels or request_rates")
         return v
