@@ -29,14 +29,14 @@ if not ttft_data.empty:
     stats = stats.reset_index()
 
     # Draw SLO reference line (5s)
-    SLO_TARGET = 5000
-    plt.axhline(
-        y=SLO_TARGET,
-        color="r",
-        linestyle="--",
-        label=f"TTFT SLO ({SLO_TARGET}s)",
-        alpha=0.7,
-    )
+    # SLO_TARGET = 5000
+    # plt.axhline(
+    #     y=SLO_TARGET,
+    #     color="r",
+    #     linestyle="--",
+    #     label=f"TTFT SLO ({SLO_TARGET}s)",
+    #     alpha=0.7,
+    # )
 
     plt.plot(
         stats["input_len"],
