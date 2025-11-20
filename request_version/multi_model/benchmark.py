@@ -14,7 +14,7 @@ MODELS = ['Chatbot-A-large', 'Chatbot-B', 'Chatbot-C']
 TEST_DURATION = 60
 
 # 基礎並發量 (Requests Per Second)
-TARGET_RPS = 1
+TARGET_RPS = 3
 
 # 輸入的 Prompt (長度最好固定，以排除 input length 的干擾，專注測切換)
 PROMPT_TEXT = "Define the Service Level Objective in one sentence."
@@ -178,50 +178,64 @@ async def run_scenario_bursty(session, results):
             pbar.update(now - last_update_time)
             last_update_time = now
 
-async def main():
-    test_case = int(input("input test_case number:\n1. Round Robin\n2. Zipfian (真實分佈)\n3. Bursty\n"))
-    if test_case not in [1, 2, 3]:
-        print(f"請輸入 1 2 3 選項")
+async def run_single_test(session, test_case):
     all_tasks = []
+    case_name = ""
     
-    async with aiohttp.ClientSession() as session:
-        # === 執行測試 (建議一次只跑一個以獲得乾淨的數據) ===
-        
-        if test_case == 1:
-            # 1. 跑 Round Robin
-            case = "round_robin"
-            await run_scenario_round_robin(session, all_tasks)
-        elif test_case == 2:
-            # 2. 跑 Zipfian
-            case = "zipfian"
-            await run_scenario_zipfian(session, all_tasks)
-        elif test_case == 3:
-            # 3. 跑 Bursty
-            case = "bursty"
-            await run_scenario_bursty(session, all_tasks)
-        else:
-            return
+    if test_case == 1:
+        case_name = "round_robin"
+        await run_scenario_round_robin(session, all_tasks)
+    elif test_case == 2:
+        case_name = "zipfian"
+        await run_scenario_zipfian(session, all_tasks)
+    elif test_case == 3:
+        case_name = "bursty"
+        await run_scenario_bursty(session, all_tasks)
+    
+    print(f"\nAll requests dispatched for {case_name}. Waiting for pending responses...")
+    
+    responses = []
+    for f in tqdm(asyncio.as_completed(all_tasks), total=len(all_tasks), desc="Collecting Responses", unit="req"):
+        responses.append(await f)
+    
+    df = pd.DataFrame(responses)
+    filename = f"benchmark_results_{case_name}.csv"
+    df.to_csv(filename, index=False)
+    print(f"Done! Results saved to {filename}")
+    
+    print(f"\n=== Quick Summary ({case_name}) ===")
+    if not df.empty:
+        print(df.groupby("model")["total_latency_ms"].describe())
+    else:
+        print("No data collected.")
 
-        print("\nAll requests dispatched. Waiting for pending responses...")
-        
-        # 這裡使用 tqdm 顯示"等待回應"的進度有點困難，因為 gather 不提供進度回調
-        # 但我們可以用一個簡單的動態顯示告知用戶還在跑
-        responses = []
-        # 使用 tqdm 來顯示等待任務完成的過程 (基於任務數量)
-        for f in tqdm(asyncio.as_completed(all_tasks), total=len(all_tasks), desc="Collecting Responses", unit="req"):
-            responses.append(await f)
-        
-        df = pd.DataFrame(responses)
-        filename = f"benchmark_results_{case}.csv"
-        df.to_csv(filename, index=False)
-        print(f"Done! Results saved to {filename}")
-        
-        print("\n=== Quick Summary ===")
-        # 修正: groupby 之後要選取存在的 column (total_latency_ms)
-        if not df.empty:
-            print(df.groupby("model")["total_latency_ms"].describe())
+async def main():
+    print("input test_case number:")
+    print("1. Round Robin")
+    print("2. Zipfian (真實分佈)")
+    print("3. Bursty")
+    print("4. Run All")
+    
+    try:
+        test_case = int(input().strip())
+    except ValueError:
+        print("Invalid input")
+        return
+
+    if test_case not in [1, 2, 3, 4]:
+        print(f"請輸入 1, 2, 3, 或 4 選項")
+        return
+
+    async with aiohttp.ClientSession() as session:
+        if test_case == 4:
+            scenarios = [1, 2, 3]
+            for i, scenario in enumerate(scenarios):
+                await run_single_test(session, scenario)
+                if i < len(scenarios) - 1:
+                    print("\nWaiting 10 seconds before next test...")
+                    await asyncio.sleep(10)
         else:
-            print("No data collected.")
+            await run_single_test(session, test_case)
 
 if __name__ == "__main__":
     asyncio.run(main())
